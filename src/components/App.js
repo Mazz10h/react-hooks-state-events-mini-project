@@ -1,21 +1,35 @@
-import React from "react";
-import CategoryFilter from "./CategoryFilter";
-import NewTaskForm from "./NewTaskForm";
-import TaskList from "./TaskList";
+import React from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import DayContainer from './DayContainer';
 
-import { CATEGORIES, TASKS } from "../data";
-console.log("Here's the data you're working with");
-console.log({ CATEGORIES, TASKS });
+const WeekView = ({ habits, onUpdateHabit }) => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const habit = habits.find(h => h.id === parseInt(id));
 
-function App() {
+  if (!habit) {
+    return <div className="container mt-4"><p>Habit not found. Go back to habits.</p></div>;
+  }
+
+  if (!habit.week || habit.week.length === 0) {
+    return <div className="container mt-4"><p>No week data available for this habit. Try refreshing.</p></div>;
+  }
+
   return (
-    <div className="App">
-      <h2>My tasks</h2>
-      <CategoryFilter />
-      <NewTaskForm />
-      <TaskList />
+    <div className="container mt-4">
+      <button className="btn btn-secondary mb-3" onClick={() => navigate('/habits')}>
+        Back to Habits
+      </button>
+      <h2>Week View: {habit.name}</h2>
+      <div className="row">
+        {habit.week.map((day, index) => (
+          <div key={`${habit.id}-${index}`} className="col-md-4">  {/* Add unique key for re-rendering */}
+            <DayContainer habit={habit} day={day} dayIndex={index} onUpdateHabit={onUpdateHabit} />
+          </div>
+        ))}
+      </div>
     </div>
   );
-}
+};
 
-export default App;
+export default WeekView;
