@@ -1,35 +1,64 @@
-import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import DayContainer from './DayContainer';
+import React, { useState } from "react";
+import CategoryFilter from "./CategoryFilter";
+import NewTaskForm from "./NewTaskForm";
+import TaskList from "./TaskList";
 
-const WeekView = ({ habits, onUpdateHabit }) => {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const habit = habits.find(h => h.id === parseInt(id));
+// Define TASKS and CATEGORIES here (replace with import if "../data" exists)
+const TASKS = [
+  { id: 1, text: "Buy rice", category: "Food" },
+  { id: 2, text: "Save a tenner", category: "Money" },
+  { id: 3, text: "Build a todo app", category: "Code" },
+  { id: 4, text: "Bake a pie", category: "Cooking" },
+  { id: 5, text: "Learn Express.js", category: "Code" },
+  { id: 6, text: "Buy apples", category: "Food" },
+  { id: 7, text: "Paint a wall", category: "Home" },
+  { id: 8, text: "Visit grandma", category: "Misc" },
+  { id: 9, text: "Buy stamps", category: "Misc" },
+  { id: 10, text: "Make a pie", category: "Cooking" }
+];
 
-  if (!habit) {
-    return <div className="container mt-4"><p>Habit not found. Go back to habits.</p></div>;
+const CATEGORIES = ["All", "Code", "Food", "Money", "Misc"];
+
+function App() {
+  const [tasks, setTasks] = useState(TASKS);
+  const [selectedCategory, setSelectedCategory] = useState("All");
+
+  // Delete a task (by ID)
+  function handleDelete(id) {
+    setTasks(tasks.filter((task) => task.id !== id));
   }
 
-  if (!habit.week || habit.week.length === 0) {
-    return <div className="container mt-4"><p>No week data available for this habit. Try refreshing.</p></div>;
+  // Filter tasks by category
+  function handleCategorySelect(category) {
+    setSelectedCategory(category);
   }
+
+  // Add a new task
+  function handleTaskFormSubmit(newTask) {
+    setTasks([...tasks, { ...newTask, id: Date.now() }]);
+  }
+
+  // Filtered tasks
+  const displayedTasks =
+    selectedCategory === "All"
+      ? tasks
+      : tasks.filter((task) => task.category === selectedCategory);
 
   return (
-    <div className="container mt-4">
-      <button className="btn btn-secondary mb-3" onClick={() => navigate('/habits')}>
-        Back to Habits
-      </button>
-      <h2>Week View: {habit.name}</h2>
-      <div className="row">
-        {habit.week.map((day, index) => (
-          <div key={`${habit.id}-${index}`} className="col-md-4">  {/* Add unique key for re-rendering */}
-            <DayContainer habit={habit} day={day} dayIndex={index} onUpdateHabit={onUpdateHabit} />
-          </div>
-        ))}
-      </div>
+    <div className="App">
+      <h2>My tasks</h2>
+      <CategoryFilter
+        categories={CATEGORIES}
+        selectedCategory={selectedCategory}
+        onCategorySelect={handleCategorySelect}
+      />
+      <NewTaskForm
+        categories={CATEGORIES.filter(cat => cat !== "All")}
+        onTaskFormSubmit={handleTaskFormSubmit}
+      />
+      <TaskList tasks={displayedTasks} onDelete={handleDelete} />
     </div>
   );
-};
+}
 
-export default WeekView;
+export default App;
